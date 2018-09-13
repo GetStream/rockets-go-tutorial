@@ -1,0 +1,15 @@
+<html>
+<body>
+<ol>
+    {% for result in response.Results %}
+    <li>
+        <img src="{{ result.URLs.small }}" />
+        {% if result.Resized %}
+            <img src="data:image/png;base64, {{ result.Resized }} " />
+        {% endif %}
+    </li>
+    {% endfor %}
+
+</ol>
+</body>
+</html>
