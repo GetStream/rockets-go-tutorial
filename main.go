@@ -7,14 +7,14 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/GetStream/rockets/seam"
-	"github.com/GetStream/rockets/unsplash"
+	"github.com/GetStream/rockets-go-tutorial/seam"
+	"github.com/GetStream/rockets-go-tutorial/unsplash"
 	"github.com/flosch/pongo2"
 )
 import b64 "encoding/base64"
 
 const (
-	url = "https://www.outerplaces.com/media/k2/items/cache/aa810e73f519481c15cdf02790d21ac8_L.jpg"
+	IMAGE_URL   string = "https://bit.ly/2N8Ra4q"
 )
 
 type Task struct {
@@ -30,10 +30,10 @@ type TaskResult struct {
 var spacexTemplate = pongo2.Must(pongo2.FromFile("spacex.html"))
 
 func main() {
-	fmt.Println("Cooling the engines, checkout http://localhost:3000/occupymars")
+	fmt.Println("Ready for liftoff! checkout http://localhost:3000/occupymars")
 
 	http.HandleFunc("/occupymars", func(w http.ResponseWriter, r *http.Request) {
-		resized, err := seam.ContentAwareResize(url)
+		resized, err := seam.ContentAwareResize(IMAGE_URL)
 		if err != nil {
 			fmt.Errorf("things broke, %s", err)
 		}
@@ -58,20 +58,20 @@ func main() {
 	http.HandleFunc("/spacex_seams", func(w http.ResponseWriter, r *http.Request) {
 		response, err := unsplash.LoadRockets()
 
-		results := make(chan *TaskResult)
-		urlsChannel := make(chan *Task, 9)
+		resultChannel := make(chan *TaskResult)
+		taskChannel := make(chan *Task, 9)
 		for i, r := range response.Results[:9] {
-			urlsChannel <- &Task{i, r.URLs["small"]}
+			taskChannel <- &Task{i, r.URLs["small"]}
 		}
 
 		for w := 1; w <= 3; w++ {
-			go worker(w, urlsChannel, results)
+			go worker(w, taskChannel, resultChannel)
 		}
 
-		close(urlsChannel)
+		close(taskChannel)
 
 		for a := 1; a <= 9; a++ {
-			taskResult := <-results
+			taskResult := <-resultChannel
 			sEnc := b64.StdEncoding.EncodeToString(taskResult.Resized)
 			response.Results[taskResult.Position].Resized = sEnc
 		}
@@ -87,11 +87,11 @@ func main() {
 
 }
 
-func worker(id int, jobs <-chan *Task, results chan<- *TaskResult) {
-	for j := range jobs {
+func worker(id int, taskChannel <-chan *Task, resultChannel chan<- *TaskResult) {
+	for j := range taskChannel {
 		fmt.Println("worker", id, "started  job", j)
 		resized, _ := seam.ContentAwareResize(j.URL)
 
-		results <- &TaskResult{j.Position, resized}
+		resultChannel <- &TaskResult{j.Position, resized}
 	}
 }

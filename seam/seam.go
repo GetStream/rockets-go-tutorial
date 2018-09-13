@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/esimov/caire"
-	"io"
-	"log"
 	"net/http"
 )
 

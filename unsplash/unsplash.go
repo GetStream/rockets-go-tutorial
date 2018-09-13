@@ -8,16 +8,16 @@ import (
 )
 
 type APIResponse struct {
-	Total int `json:"total"`
+	Total      int `json:"total"`
 	TotalPages int `json:"total_pages"`
-	Results []*PictureResult
+	Results    []*PictureResult
 }
 
 type PictureResult struct {
-	ID string `json:"id"`
-	Width int `json:"width"`
-	Height int `json:"width"`
-	URLs map[string]string `json:"urls"`
+	ID      string            `json:"id"`
+	Width   int               `json:"width"`
+	Height  int               `json:"width"`
+	URLs    map[string]string `json:"urls"`
 	Resized string
 }
 
@@ -25,7 +25,7 @@ type APIClient struct {
 	AccessToken string
 }
 
-func NewAPIClient(token string) APIClient{
+func NewAPIClient(token string) APIClient {
 	return APIClient{token}
 }
 
@@ -45,10 +45,6 @@ func (c *APIClient) Search(query string) (*APIResponse, error) {
 	defer resp.Body.Close()
 	return &response, nil
 }
-
-
-
-
 
 func LoadRockets() (*APIResponse, error) {
 	query := "spacex"

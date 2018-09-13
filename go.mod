@@ -1,4 +1,4 @@
-module github.com/GetStream/rockets
+module github.com/GetStream/rockets-go-tutorial
 
 require (
 	github.com/esimov/caire v1.1.0

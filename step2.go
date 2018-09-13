@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	IMAGE_URL   string = "https://www.outerplaces.com/media/k2/items/cache/aa810e73f519481c15cdf02790d21ac8_L.jpg"
+	IMAGE_URL   string = "https://bit.ly/2N8Ra4q"
 )
 
 func ContentAwareResize(url string) ([]byte, error) {
