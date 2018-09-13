@@ -51,5 +51,4 @@ func LoadRockets() (*APIResponse, error) {
 	client := NewAPIClient("c1f9504a548ec5ea75acf3a3919ceab1ab04d09b732a839f04ca0be74f6227a0")
 	response, err := client.Search(query)
 	return response, err
-
 }
