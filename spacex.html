@@ -1,7 +1,7 @@
 <html>
 <body>
 <ol>
-    {% for result in response.Results %}
+    {% for result in response.Results|slice:":9" %}
     <li>
         <img src="{{ result.URLs.small }}" />
         {% if result.Resized %}

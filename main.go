@@ -33,14 +33,17 @@ func main() {
 	fmt.Println("Ready for liftoff! checkout \n http://localhost:3000/occupymars \n http://localhost:3000/spacex \n http://localhost:3000/spacex_seams")
 
 	http.HandleFunc("/occupymars", func(w http.ResponseWriter, r *http.Request) {
-		resized, err := seam.ContentAwareResize(IMAGE_URL)
-		if err != nil {
-			fmt.Errorf("things broke, %s", err)
+		if r.URL.Query().Get("resize") > "" {
+			resized, err := seam.ContentAwareResize(IMAGE_URL)
+			if err != nil {
+				fmt.Errorf("things broke, %s", err)
+			}
+
+			w.Header().Set("Content-Type", "image/jpeg")
+			io.Copy(w, bytes.NewReader(resized))
+		} else {
+			fmt.Fprintf(w, "<html><div>Original image:</div> <img src=\"%s\" /><br/><a href=\"?resize=1\">Resize using Seam Carving</a></html>", IMAGE_URL)
 		}
-
-		w.Header().Set("Content-Type", "image/jpeg")
-		io.Copy(w, bytes.NewReader(resized))
-
 	})
 
 	http.HandleFunc("/spacex", func(w http.ResponseWriter, r *http.Request) {

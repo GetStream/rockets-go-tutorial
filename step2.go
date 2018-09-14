@@ -46,11 +46,17 @@ func main() {
 	fmt.Println("Ready for liftoff! checkout http://localhost:3000/occupymars")
 
 	http.HandleFunc("/occupymars", func(w http.ResponseWriter, r *http.Request) {
-		resized, _ := ContentAwareResize(IMAGE_URL)
+		if r.URL.Query().Get("resize") > "" {
+			resized, err := ContentAwareResize(IMAGE_URL)
+			if err != nil {
+				fmt.Errorf("things broke, %s", err)
+			}
 
-		w.Header().Set("Content-Type", "image/jpeg")
-		io.Copy(w, bytes.NewReader(resized))
-
+			w.Header().Set("Content-Type", "image/jpeg")
+			io.Copy(w, bytes.NewReader(resized))
+		} else {
+			fmt.Fprintf(w, "<html><div>Original image:</div> <img src=\"%s\" /><br/><a href=\"?resize=1\">Resize using Seam Carving</a></html>", IMAGE_URL)
+		}
 	})
 
 	log.Fatal(http.ListenAndServe(":3000", nil))
