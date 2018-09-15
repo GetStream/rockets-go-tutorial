@@ -8,15 +8,15 @@ import (
 )
 
 type APIResponse struct {
-	Total      int `json:"total"`
-	TotalPages int `json:"total_pages"`
-	Results    []*PictureResult
+	Total      int              `json:"total"`
+	TotalPages int              `json:"total_pages"`
+	Results    []*PictureResult `json:"results"`
 }
 
 type PictureResult struct {
 	ID      string            `json:"id"`
 	Width   int               `json:"width"`
-	Height  int               `json:"width"`
+	Height  int               `json:"height"`
 	URLs    map[string]string `json:"urls"`
 	Resized string
 }
@@ -33,16 +33,18 @@ func (c *APIClient) Search(query string) (*APIResponse, error) {
 	url := fmt.Sprintf("https://api.unsplash.com/search/photos?page=1&query=%s&client_id=%s", query, c.AccessToken)
 	fmt.Println(url)
 	resp, err := http.Get(url)
+	// The client must close the response body when finished with it
+	defer resp.Body.Close()
+
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to read from Unsplash API")
 	}
 	response := APIResponse{}
-	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
+	err = json.NewDecoder(resp.Body).Decode(&response)
+	if err != nil {
 		return nil, errors.Wrap(err, "failed to parse JSON")
 	}
 
-	// The client must close the response body when finished with it
-	defer resp.Body.Close()
 	return &response, nil
 }
 

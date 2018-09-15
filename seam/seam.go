@@ -10,11 +10,11 @@ import (
 func ContentAwareResize(url string) ([]byte, error) {
 	fmt.Printf("Download starting for url %s", url)
 	response, err := http.Get(url)
+	defer response.Body.Close()
+
 	if err != nil {
 		return nil, err
 	}
-
-	defer response.Body.Close()
 
 	converted := &bytes.Buffer{}
 	fmt.Printf("Download complete %s", url)
@@ -22,8 +22,8 @@ func ContentAwareResize(url string) ([]byte, error) {
 	shrinkFactor := 30
 	fmt.Printf("Resize in progress %s, shrinking width by %d percent...", url, shrinkFactor)
 	p := &caire.Processor{
-		NewWidth:       shrinkFactor,
-		Percentage:     true,
+		NewWidth:   shrinkFactor,
+		Percentage: true,
 	}
 
 	err = p.Process(response.Body, converted)

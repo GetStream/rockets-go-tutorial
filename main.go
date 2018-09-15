@@ -30,7 +30,7 @@ type TaskResult struct {
 var spacexTemplate = pongo2.Must(pongo2.FromFile("spacex.html"))
 
 func main() {
-	fmt.Println("Ready for liftoff! checkout \n http://localhost:3000/occupymars \n http://localhost:3000/spacex \n http://localhost:3000/spacex_seams")
+	fmt.Println("Ready for liftoff! Checkout \n http://localhost:3000/occupymars \n http://localhost:3000/spacex \n http://localhost:3000/spacex_seams")
 
 	http.HandleFunc("/occupymars", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Query().Get("resize") > "" {
