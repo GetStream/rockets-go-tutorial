@@ -62,18 +62,18 @@ func main() {
 		response, err := unsplash.LoadRockets()
 
 		resultChannel := make(chan *TaskResult)
-		taskChannel := make(chan *Task, 9)
-		for i, r := range response.Results[:9] {
+		taskChannel := make(chan *Task, 8)
+		for i, r := range response.Results[:8] {
 			taskChannel <- &Task{i, r.URLs["small"]}
 		}
 
-		for w := 1; w <= 3; w++ {
+		for w := 1; w <= 4; w++ {
 			go worker(w, taskChannel, resultChannel)
 		}
 
 		close(taskChannel)
 
-		for a := 1; a <= 9; a++ {
+		for a := 1; a <= 8; a++ {
 			taskResult := <-resultChannel
 			sEnc := b64.StdEncoding.EncodeToString(taskResult.Resized)
 			response.Results[taskResult.Position].Resized = sEnc
