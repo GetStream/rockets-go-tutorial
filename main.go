@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	IMAGE_URL string = "https://bit.ly/2N8Ra4q"
+	IMAGE_URL string = "https://bit.ly/2QGPDkr"
 )
 
 type Task struct {
