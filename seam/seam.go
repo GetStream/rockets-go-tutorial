@@ -3,8 +3,10 @@ package seam
 import (
 	"bytes"
 	"fmt"
-	"github.com/esimov/caire"
 	"net/http"
+
+	"github.com/esimov/caire"
+	"github.com/pkg/errors"
 )
 
 func ContentAwareResize(url string) ([]byte, error) {
@@ -13,7 +15,7 @@ func ContentAwareResize(url string) ([]byte, error) {
 	defer response.Body.Close()
 
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Failed to read the image")
 	}
 
 	converted := &bytes.Buffer{}
@@ -28,7 +30,7 @@ func ContentAwareResize(url string) ([]byte, error) {
 
 	err = p.Process(response.Body, converted)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Failed to apply seam carving to the image")
 	}
 	fmt.Printf("Seam carving completed for %s", url)
 

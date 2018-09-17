@@ -36,7 +36,7 @@ func main() {
 		if r.URL.Query().Get("resize") > "" {
 			resized, err := seam.ContentAwareResize(IMAGE_URL)
 			if err != nil {
-				fmt.Errorf("things broke, %s", err)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
 			}
 
 			w.Header().Set("Content-Type", "image/jpeg")

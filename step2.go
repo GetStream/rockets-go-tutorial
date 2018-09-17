@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/esimov/caire"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -19,7 +20,7 @@ func ContentAwareResize(url string) ([]byte, error) {
 	response, err := http.Get(url)
 	defer response.Body.Close()
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Failed to read the image")
 	}
 
 	converted := &bytes.Buffer{}
@@ -34,7 +35,7 @@ func ContentAwareResize(url string) ([]byte, error) {
 
 	err = p.Process(response.Body, converted)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Failed to apply seam carving to the image")
 	}
 	fmt.Printf("Seam carving completed for %s", url)
 
@@ -48,8 +49,7 @@ func main() {
 		if r.URL.Query().Get("resize") > "" {
 			resized, err := ContentAwareResize(IMAGE_URL)
 			if err != nil {
-				fmt.Errorf("things broke, %s", err)
-				return
+				http.Error(w, err.Error(), http.StatusInternalServerError)
 			}
 
 			w.Header().Set("Content-Type", "image/jpeg")
