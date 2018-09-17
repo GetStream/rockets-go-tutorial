@@ -7,14 +7,15 @@ import (
 	"log"
 	"net/http"
 
+	b64 "encoding/base64"
+
 	"github.com/GetStream/rockets-go-tutorial/seam"
 	"github.com/GetStream/rockets-go-tutorial/unsplash"
 	"github.com/flosch/pongo2"
 )
-import b64 "encoding/base64"
 
 const (
-	IMAGE_URL   string = "https://bit.ly/2N8Ra4q"
+	IMAGE_URL string = "https://bit.ly/2N8Ra4q"
 )
 
 type Task struct {
@@ -25,6 +26,7 @@ type Task struct {
 type TaskResult struct {
 	Position int
 	Resized  []byte
+	Err      error
 }
 
 var spacexTemplate = pongo2.Must(pongo2.FromFile("spacex.html"))
@@ -62,19 +64,29 @@ func main() {
 		response, err := unsplash.LoadRockets()
 
 		resultChannel := make(chan *TaskResult)
-		taskChannel := make(chan *Task, 8)
-		for i, r := range response.Results[:8] {
-			taskChannel <- &Task{i, r.URLs["small"]}
-		}
+		taskChannel := make(chan *Task)
+		imagesToResize := 8
 
+		// start 4 workers
 		for w := 1; w <= 4; w++ {
 			go worker(w, taskChannel, resultChannel)
 		}
 
-		close(taskChannel)
+		// write to the taskChannel and close it when we're done
+		go func() {
+			for i, r := range response.Results[:imagesToResize] {
+				taskChannel <- &Task{i, r.URLs["small"]}
+			}
+			close(taskChannel)
+		}()
 
-		for a := 1; a <= 8; a++ {
+		// start listening for results in a separate goroutine
+		for a := 1; a <= imagesToResize; a++ {
 			taskResult := <-resultChannel
+			if taskResult.Err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
 			sEnc := b64.StdEncoding.EncodeToString(taskResult.Resized)
 			response.Results[taskResult.Position].Resized = sEnc
 		}
@@ -83,18 +95,15 @@ func main() {
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
-
 	})
 
 	log.Fatal(http.ListenAndServe(":3000", nil))
-
 }
 
 func worker(id int, taskChannel <-chan *Task, resultChannel chan<- *TaskResult) {
 	for j := range taskChannel {
-		fmt.Println("worker", id, "started  job", j)
-		resized, _ := seam.ContentAwareResize(j.URL)
-
-		resultChannel <- &TaskResult{j.Position, resized}
+		fmt.Println("worker", id, "started  job", j.Position)
+		resized, err := seam.ContentAwareResize(j.URL)
+		resultChannel <- &TaskResult{j.Position, resized, err}
 	}
 }
