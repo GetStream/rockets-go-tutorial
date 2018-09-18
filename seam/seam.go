@@ -12,11 +12,10 @@ import (
 func ContentAwareResize(url string) ([]byte, error) {
 	fmt.Printf("Download starting for url %s \n", url)
 	response, err := http.Get(url)
-	defer response.Body.Close()
-
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed to read the image")
 	}
+	defer response.Body.Close()
 
 	converted := &bytes.Buffer{}
 	fmt.Printf("Download complete %s \n", url)
