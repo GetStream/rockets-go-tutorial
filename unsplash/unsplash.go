@@ -9,8 +9,8 @@ import (
 )
 
 type APIResponse struct {
-	Total      int              `json:"total"`
-	TotalPages int              `json:"total_pages"`
+	Total      int             `json:"total"`
+	TotalPages int             `json:"total_pages"`
 	Results    []PictureResult `json:"results"`
 }
 
