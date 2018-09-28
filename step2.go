@@ -50,6 +50,7 @@ func main() {
 			resized, err := ContentAwareResize(IMAGE_URL)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
 			}
 
 			w.Header().Set("Content-Type", "image/jpeg")
